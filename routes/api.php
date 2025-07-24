@@ -2,12 +2,18 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
 
-Route::get("/", function() {
-    return Response::json(['message' => 'Welcome to the API']);
+Route::prefix('v1')->group(function () {
+    Route::name('auth.')->prefix('auth')->group(function () {
+        require __DIR__ . '/api/auth.php';
+
+        Route::name('register.')->prefix('register')->group(function () {
+            require __DIR__ . '/api/register.php';
+        });
+    });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::apiResource('categories', CategoryController::class);
+    });
 });
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-

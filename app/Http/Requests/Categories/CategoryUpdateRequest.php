@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Http\Requests\Categories;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class CategoryUpdateRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'slug' => 'sometimes|string|max:255|unique:categories,slug,' . $this->category->id,
+        ];
+    }
+
+    /**
+     * Get the validation messages that apply to the request.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.sometimes' => 'O campo do :attribute é obrigatório.',
+            'name.string' => 'O campo do :attribute deve ser texto.',
+            'name.max' => 'O campo do :attribute deve ter no máximo 255 caracteres.',
+            'description.string' => 'O campo da :attribute deve ser texto.',
+            'description.max' => 'O campo da :attribute deve ter no máximo 1000 caracteres.',
+            'slug.sometimes' => 'O campo do :attribute é obrigatório.',
+            'slug.string' => 'O campo do :attribute deve ser texto.',
+            'slug.max' => 'O campo do :attribute deve ter no máximo 255 caracteres.',
+            'slug.unique' => 'O :attribute já está em uso.',
+        ];
+    }
+
+    /**
+     * Summary of attributes
+     * @return array{description: string, name: string, slug: string}
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nome',
+            'description' => 'descrição',
+            'slug' => 'slug',
+        ];
+    }
+}
