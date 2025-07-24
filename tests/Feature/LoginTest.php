@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
+    use RefreshDatabase, WithFaker;
     /**
      * Test successful login with valid credentials.
      */
@@ -20,7 +21,7 @@ class LoginTest extends TestCase
             'password' => bcrypt($password),
         ]);
 
-        $this->postJson('/api/v1/auth/signin', [
+        $this->postJson(route('auth.singin.credentials'), [
             'email' => $user->email,
             'password' => $password,
         ], [
@@ -43,7 +44,7 @@ class LoginTest extends TestCase
      */
     public function test_error_on_invalid_data(): void
     {
-        $this->postJson('/api/v1/auth/signin', [
+        $this->postJson(route('auth.singin.credentials'), [
             'email' => 'email@email.com',
             'password' => 'AlgumaSenhaAleatoria#389127',
         ], [
@@ -56,7 +57,7 @@ class LoginTest extends TestCase
 
     public function test_with_empty_fields()
     {
-        $this->postJson('/api/v1/auth/signin', [
+        $this->postJson(route('auth.singin.credentials'), [
             'email' => '',
             'password' => '',
         ], [

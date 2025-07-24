@@ -59,6 +59,7 @@ class RegisterRequest extends FormRequest
         return [
             'name.required' => 'O nome completo é obrigatório.',
             'name.regex' => 'Por favor, insira pelo menos nome e sobrenome.',
+            'email.required' => 'O campo e-mail é obrigatório.',
             'email.unique' => 'Este e-mail já está em uso.',
             'password.required' => 'O campo senha é obrigatório.',
             'password.confirmed' => 'A confirmação de senha não corresponde.',

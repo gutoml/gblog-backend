@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Services\Auth\RegisterNewUserService;
 
 class RegisterController extends Controller
 {
@@ -14,15 +15,13 @@ class RegisterController extends Controller
      */
     public function credentials(RegisterRequest $request): \Illuminate\Http\JsonResponse
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+        try {
+            $registerNewUserService = new RegisterNewUserService();
+            $response = $registerNewUserService->execute($request->validated());
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
+        return response()->json($response, 201);
     }
 }
