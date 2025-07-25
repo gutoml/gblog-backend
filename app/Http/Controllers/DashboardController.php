@@ -9,24 +9,31 @@ use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
-        $perPage = $request->has('perPage')
-            ? $request->get('perPage')
-            : 15;
+        $perPage = $request->get('perPage', 5); // Padrão de 5 itens por página
 
+        // Otimizando as consultas
         $responseData = [
-            'postsCount' => $user->posts()->count(),
-            'categoriesRanking' => Category::withCount('posts')
+            'stats' => [
+                'posts_count' => $user->posts()->count(),
+                'categories_count' => Category::has('posts')->count(),
+            ],
+
+            'categories_ranking' => Category::select(['id', 'name', 'slug'])
+                ->withCount('posts')
                 ->orderByDesc('posts_count')
                 ->limit(10)
                 ->get(),
-            'postsLast' => Post::with(['user', 'category'])
-                ->orderBy('created_at', 'desc')
+
+            'latest_posts' => Post::query()
+                ->select(['id', 'title', 'slug', 'created_at', 'user_id', 'category_id'])
+                ->with([
+                    'user:id,name',
+                    'category:id,name,slug'
+                ])
+                ->orderByDesc('created_at')
                 ->paginate($perPage)
         ];
 
