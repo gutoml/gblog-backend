@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Categories;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryUpdateRequest extends FormRequest
@@ -22,9 +23,22 @@ class CategoryUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'slug' => 'sometimes|string|max:255|unique:categories,slug,' . $this->category->id,
+            'name' => [
+                'sometimes',
+                'string',
+                'max:255'
+            ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:1000'
+            ],
+            'slug' => [
+                'sometimes',
+                'string',
+                'max:255',
+                Rule::unique('categories', 'slug')->ignore($this->category?->id),
+            ],
         ];
     }
 

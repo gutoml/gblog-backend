@@ -42,18 +42,30 @@ class AuthRequest extends FormRequest
         ];
     }
 
+    /**
+     * Summary of messages
+     * @return array{email.email: string, email.required: string, password.letters: string, password.max: string, password.min: string, password.mixedCase: string, password.numbers: string, password.required: string, password.symbols: string}
+     */
     public function messages(): array
     {
         return [
-            'email.required' => 'O e-mail é obrigatório.',
-            'email.email' => 'Informe um e-mail válido.',
-            'password.required' => 'A senha é obrigatória.',
-            'password.min' => 'A senha deve ter no mínimo 8 caracteres.',
-            'password.max' => 'A senha deve ter no máximo 32 caracteres.',
-            'password.letters' => 'A senha deve conter letras.',
-            'password.mixedCase' => 'A senha deve conter letras maiúsculas e minúsculas.',
-            'password.numbers' => 'A senha deve conter números.',
-            'password.symbols' => 'A senha deve conter símbolos especiais.',
+            'email.required' => 'O :attribute é obrigatório.',
+            'email.email' => 'Informe um :attribute válido.',
+            'password.required' => 'A :attribute é obrigatória.',
+            'password.min' => 'A :attribute deve ter no mínimo 8 caracteres.',
+            'password.max' => 'A :attribute deve ter no máximo 32 caracteres.',
+            'password.letters' => 'A :attribute deve conter letras.',
+            'password.mixedCase' => 'A :attribute deve conter letras maiúsculas e minúsculas.',
+            'password.numbers' => 'A :attribute deve conter números.',
+            'password.symbols' => 'A :attribute deve conter símbolos especiais.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'email' => 'e-mail',
+            'password' => 'senha',
         ];
     }
 }

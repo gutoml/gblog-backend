@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthRequest;
 use App\Services\Auth\SignInCredentialsService;
@@ -10,7 +11,7 @@ use App\Services\Auth\SignOutCredentialsService;
 
 class AuthController extends Controller
 {
-    public function signinCredential(AuthRequest $request): \Illuminate\Http\JsonResponse
+    public function signinCredential(AuthRequest $request): JsonResponse
     {
         try {
             $signInCredentialsService = new SignInCredentialsService();
@@ -22,7 +23,7 @@ class AuthController extends Controller
         return response()->json($response);
     }
 
-    public function signoutCredentials(Request $request): \Illuminate\Http\JsonResponse
+    public function signoutCredentials(Request $request): JsonResponse
     {
         $signOutCredentialsService = new SignOutCredentialsService();
         $message = $signOutCredentialsService->execute();

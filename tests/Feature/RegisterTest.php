@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class RegisterTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use RefreshDatabase;
 
     /**
      * Summary of test_with_valid_data

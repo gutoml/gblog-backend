@@ -57,19 +57,32 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'O nome completo é obrigatório.',
-            'name.regex' => 'Por favor, insira pelo menos nome e sobrenome.',
-            'email.required' => 'O campo e-mail é obrigatório.',
-            'email.unique' => 'Este e-mail já está em uso.',
-            'password.required' => 'O campo senha é obrigatório.',
-            'password.confirmed' => 'A confirmação de senha não corresponde.',
-            'password.min' => 'A senha deve ter no mínimo 8 caracteres.',
-            'password.max' => 'A senha deve ter no máximo 32 caracteres.',
-            'password.letters' => 'A senha deve conter letras.',
-            'password.mixedCase' => 'A senha deve conter letras maiúsculas e minúsculas.',
-            'password.numbers' => 'A senha deve conter números.',
-            'password.symbols' => 'A senha deve conter símbolos especiais.',
-            'password.uncompromised' => 'Esta senha foi comprometida em vazamentos de dados. Por favor, escolha outra senha.',
+            'name.required' => 'O :attribute é obrigatório.',
+            'name.regex' => 'Por favor, insira seu :attribute.',
+            'email.required' => 'O campo :attribute é obrigatório.',
+            'email.unique' => 'Este :attribute já está em uso.',
+            'password.required' => 'O campo :attribute é obrigatório.',
+            'password.confirmed' => 'A confirmação de :attribute não corresponde.',
+            'password.min' => 'A :attribute deve ter no mínimo 8 caracteres.',
+            'password.max' => 'A :attribute deve ter no máximo 32 caracteres.',
+            'password.letters' => 'A :attribute deve conter letras.',
+            'password.mixedCase' => 'A :attribute deve conter letras maiúsculas e minúsculas.',
+            'password.numbers' => 'A :attribute deve conter números.',
+            'password.symbols' => 'A :attribute deve conter símbolos especiais.',
+            'password.uncompromised' => 'Esta :attribute foi comprometida em vazamentos de dados. Por favor, escolha outra :attribute.',
+        ];
+    }
+
+    /**
+     * Summary of attributes
+     * @return array{email: string, name: string, password: string}
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nome completo',
+            'email' => 'e-mail',
+            'password' => 'senha',
         ];
     }
 
