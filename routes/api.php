@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,7 @@ Route::prefix('v1')->group(function () {
 
     // Rotas privadas
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('posts', PostController::class)->except(['show']);
     });
