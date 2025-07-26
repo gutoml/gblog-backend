@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Http\UploadedFile;
+
 interface Service
 {
     /**
