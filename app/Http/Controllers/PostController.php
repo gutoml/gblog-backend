@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Posts\PostUpdateRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -28,8 +29,14 @@ class PostController extends Controller
     public function store(PostStoreRequest $request): JsonResponse
     {
         $post = $this->post->create($request->validated());
+        $post->images()->attach($request->image_id);
 
-        return response()->json($post, 201);
+        return response()->json(
+            new PostResource(
+                $post->load(['category', 'images'])
+            ),
+            201
+        );
     }
 
     /**
@@ -37,7 +44,11 @@ class PostController extends Controller
      */
     public function show(Post $post): JsonResponse
     {
-        return response()->json($post);
+        return response()->json(
+            new PostResource(
+                $post->load(['category', 'images'])
+            )
+        );
     }
 
     /**
@@ -46,8 +57,9 @@ class PostController extends Controller
     public function update(PostUpdateRequest $request, Post $post): JsonResponse
     {
         $post->update($request->validated());
+        $post->images()->sync($request->image_id);
 
-        return response()->json($post);
+        return response()->json(new PostResource($post->load(['category', 'images'])));
     }
 
     /**

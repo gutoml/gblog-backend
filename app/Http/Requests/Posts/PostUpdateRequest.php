@@ -33,6 +33,10 @@ class PostUpdateRequest extends FormRequest
                 'integer',
                 'exists:categories,id'
             ],
+            'image_id' => [
+                'sometimes',
+                Rule::exists('images', 'id')
+            ],
             'title' => [
                 'sometimes',
                 'string',
@@ -61,24 +65,23 @@ class PostUpdateRequest extends FormRequest
         return [
             'user_id.sometimes' => 'O autor é obrigatório.',
             'user_id.exists' => 'O usuário selecionado não existe.',
-            'category_id.sometimes' => 'A categoria é obrigatória.',
-            'category_id.exists' => 'A categoria selecionada não existe.',
-            'title.sometimes' => 'O :attribute é obrigatório.',
+            'category_id.exists' => 'A :attribute selecionada não existe.',
+            'image_id.exists' => 'Essa :attribute não existe.',
             'title.max' => 'O :attribute não pode ter mais de 255 caracteres.',
-            'content.sometimes' => 'O :attribute é obrigatório.',
             'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
-            'slug.sometimes' => 'O :attribute é obrigatório.',
             'slug.unique' => 'Este :attribute já está em uso.',
         ];
     }
 
     /**
      * Summary of attributes
-     * @return array{content: string, slug: string, title: string}
+     * @return array{category_id: \App\Models\Category, image_id: \App\Models\Image, content: string, slug: string, title: string}
      */
     public function attributes(): array
     {
         return [
+            'category_id' => 'categoria',
+            'image_id' => 'imagem',
             'title' => 'título',
             'content' => 'conteúdo',
             'slug' => 'slug',

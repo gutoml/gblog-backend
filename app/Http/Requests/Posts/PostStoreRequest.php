@@ -33,6 +33,10 @@ class PostStoreRequest extends FormRequest
                 'integer',
                 'exists:categories,id'
             ],
+            'image_id' => [
+                'required',
+                Rule::exists('images', 'id')
+            ],
             'title' => [
                 'required',
                 'string',
@@ -61,14 +65,31 @@ class PostStoreRequest extends FormRequest
         return [
             'user_id.required' => 'O autor é obrigatório.',
             'user_id.exists' => 'O usuário selecionado não existe.',
-            'category_id.required' => 'A categoria é obrigatória.',
-            'category_id.exists' => 'A categoria selecionada não existe.',
-            'title.required' => 'O título é obrigatório.',
-            'title.max' => 'O título não pode ter mais de 255 caracteres.',
-            'content.required' => 'O conteúdo é obrigatório.',
-            'content.min' => 'O conteúdo deve ter pelo menos 10 caracteres.',
-            'slug.required' => 'O slug é obrigatório.',
-            'slug.unique' => 'Este slug já está em uso.',
+            'category_id.required' => 'A :attribute é obrigatória.',
+            'category_id.exists' => 'A :attribute selecionada não existe.',
+            'image_id.required' => 'Escolha uma :attribute.',
+            'image_id.exists' => 'Essa :attribute não existe.',
+            'title.required' => 'O :attribute é obrigatório.',
+            'title.max' => 'O :attribute não pode ter mais de 255 caracteres.',
+            'content.required' => 'O :attribute é obrigatório.',
+            'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
+            'slug.required' => 'O :attribute é obrigatório.',
+            'slug.unique' => 'Este :attribute já está em uso.',
+        ];
+    }
+
+    /**
+     * Summary of attributes
+     * @return array{category_id: \App\Models\Category, image_id: \App\Models\Image, content: string, slug: string, title: string}
+     */
+    public function attributes(): array
+    {
+        return [
+            'category_id' => 'categoria',
+            'image_id' => 'imagem',
+            'title' => 'título',
+            'content' => 'conteúdo',
+            'slug' => 'slug',
         ];
     }
 

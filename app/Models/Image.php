@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Image extends Model
@@ -17,19 +16,8 @@ class Image extends Model
         'url',
     ];
 
-    /**
-     * Relacionamento polimórfico com outras entidades
-     */
-    public function imageables(): HasMany
+    public function posts(): MorphToMany
     {
-        return $this->hasMany(Imageable::class);
-    }
-
-    /**
-     * Obtém todos os modelos relacionados
-     */
-    public function models(): MorphToMany
-    {
-        return $this->morphedByMany(Imageable::class, 'imageable');
+        return $this->morphedByMany(Post::class, 'imageable');
     }
 }

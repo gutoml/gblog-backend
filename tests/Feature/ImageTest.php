@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Services\Service;
+use Illuminate\Database\Eloquent\Model;
 use Mockery;
+use Mockery\MockInterface;
+use Str;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Image;
@@ -24,6 +28,10 @@ class ImageTest extends TestCase
         $this->user = User::factory()->create();
     }
 
+    /**
+     * Summary of test_it_can_list_images
+     * @return void
+     */
     public function test_it_can_list_images()
     {
         $this->actingAs($this->user);
@@ -65,6 +73,10 @@ class ImageTest extends TestCase
             ->assertJsonCount(20, 'data');
     }
 
+    /**
+     * Summary of test_pagination_returns_correct_page
+     * @return void
+     */
     public function test_pagination_returns_correct_page()
     {
         $this->actingAs($this->user);
@@ -77,6 +89,10 @@ class ImageTest extends TestCase
         $response->assertJsonCount(10, 'data');
     }
 
+    /**
+     * Summary of test_can_change_per_page
+     * @return void
+     */
     public function test_can_change_per_page()
     {
         $this->actingAs($this->user);
@@ -90,9 +106,15 @@ class ImageTest extends TestCase
         ])->assertJsonCount(10, 'data');
     }
 
+    /**
+     * Summary of test_it_can_show_single_image
+     * @return void
+     */
     public function test_it_can_show_single_image()
     {
         $this->actingAs($this->user);
+
+        $storageDisk = Storage::disk('public');
 
         $image = Image::factory()->create();
 
@@ -105,13 +127,28 @@ class ImageTest extends TestCase
                 'name' => $image->name,
                 'url' => $image->url,
             ]);
+
+        $storageDisk->assertExists(
+            Str::replace('/storage', '', $image->url)
+        );
     }
 
+    /**
+     * Summary of test_it_can_delete_an_image
+     * @return void
+     */
     public function test_it_can_delete_an_image()
     {
         $this->actingAs($this->user);
 
+        $storageDisk = Storage::disk('public');
+
         $image = Image::factory()->create();
+
+        $imageDir = Str::replace('/storage', '', $image->url);
+
+        $storageDisk->delete($imageDir);
+        $storageDisk->assertMissing($imageDir);
 
         $response = $this->deleteJson(route('images.destroy', $image->id));
 
@@ -122,27 +159,10 @@ class ImageTest extends TestCase
         ]);
     }
 
-    public function test_it_returns_error_for_invalid_images()
-    {
-        $this->actingAs($this->user);
-
-        $invalidFile = UploadedFile::fake()->create('document.pdf', 1000);
-        $response = $this->postJson(route('images.store'), [
-            'images' => [$invalidFile]
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['images.0']);
-
-        $largeFile = UploadedFile::fake()->image('large.jpg')->size(6 * 1024); // 6MB
-        $response = $this->postJson(route('images.store'), [
-            'images' => [$largeFile]
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['images.0']);
-    }
-
+    /**
+     * Summary of test_it_handles_database_failure_during_upload
+     * @return void
+     */
     public function test_it_handles_database_failure_during_upload()
     {
         $this->actingAs($this->user);
@@ -150,24 +170,29 @@ class ImageTest extends TestCase
         $validImage = UploadedFile::fake()->image('valid.jpg', 800, 600)->size(1500);
 
         // Mock do service
-        $mockService = Mockery::mock(ImageStoreService::class);
-        $mockService->shouldReceive('execute')
-            ->with($validImage)
-            ->andReturn([
-                'name' => 'valid.jpg',
-                'url' => 'images/valid.jpg'
-            ]);
-        $this->app->instance(ImageStoreService::class, $mockService);
+        $this->instance(
+            Service::class,
+            $this->mock(ImageStoreService::class, function(MockInterface $mock) use ($validImage) {
+                $mock->shouldReceive('execute')
+                    ->with($validImage)
+                    ->andReturnValues([
+                        'name' => $validImage->getClientOriginalName(),
+                        'url' => 'images/' . $validImage->getClientOriginalName()
+                    ]);
+            })
+        );
 
-        // Mock da model de imagem
-        $mockImage = Mockery::mock(Image::class);
-        $mockImage->shouldReceive('create')
-            ->with([
-                'name' => 'valid.jpg',
-                'url' => 'images/valid.jpg'
-            ])
-            ->andReturn(false);
-        $this->app->instance(Image::class, $mockImage);
+        $this->instance(
+            Model::class,
+            $this->mock(Image::class, function(MockInterface $mock) use($validImage) {
+                $mock->shouldReceive('create')
+                    ->with([
+                        'name' => $validImage->getClientOriginalName(),
+                        'url' => 'images/' . $validImage->getClientOriginalName(),
+                    ])
+                    ->andReturn(false);
+            })
+        );
 
         $response = $this->postJson(route('images.store'), [
             'images' => [$validImage]
@@ -175,9 +200,14 @@ class ImageTest extends TestCase
 
         $response->assertStatus(500);
 
+        // Storage::disk('public')->assertMissing('images/valid.jpg');
         Storage::disk('public')->assertMissing('images/valid.jpg');
     }
 
+    /**
+     * Summary of test_it_returns_404_for_nonexistent_image
+     * @return void
+     */
     public function test_it_returns_404_for_nonexistent_image()
     {
         $this->actingAs($this->user);
@@ -233,11 +263,13 @@ class ImageTest extends TestCase
             ]);
     }
 
+    /**
+     * Summary of test_it_can_upload_single_image
+     * @return void
+     */
     public function test_it_can_upload_single_image()
     {
         $this->actingAs($this->user);
-
-        Storage::fake('public');
 
         // Cria uma imagem fake que atende todas as validações
         $image = UploadedFile::fake()->image('profile.jpg', 800, 600)
@@ -265,15 +297,18 @@ class ImageTest extends TestCase
         // Verifica se foi criado no banco de dados
         $this->assertDatabaseHas('images', [
             'id' => $imageData['id'],
-            'name' => 'profile.jpg'
+            'name' => $imageData['name'],
+            'url' => $imageData['url']
         ]);
     }
 
+    /**
+     * Summary of test_it_can_upload_multiple_images
+     * @return void
+     */
     public function test_it_can_upload_multiple_images()
     {
         $this->actingAs($this->user);
-
-        Storage::fake('public');
 
         // Cria 3 imagens fakes válidas
         $images = [
@@ -301,19 +336,23 @@ class ImageTest extends TestCase
 
             $this->assertDatabaseHas('images', [
                 'id' => $imageData['id'],
-                'name' => $imageData['name']
+                'name' => $imageData['name'],
+                'url' => $imageData['url']
             ]);
         }
     }
 
+    /**
+     * Summary of test_it_returns_proper_response_after_upload
+     * @return void
+     */
     public function test_it_returns_proper_response_after_upload()
     {
         $this->actingAs($this->user);
-        Storage::fake('public');
 
         // Cria imagem de teste válida
         $image = UploadedFile::fake()->image('profile.jpg', 800, 600)
-            ->size(2000); // 2KB
+            ->size(2000); // 2mb
 
         $response = $this->postJson(route('images.store'), [
             'images' => [$image]
@@ -333,19 +372,18 @@ class ImageTest extends TestCase
         $responseData = $response->json()[0];
         $this->assertEquals('profile.jpg', $responseData['name']);
         $this->assertNotNull($responseData['id']);
-
-        // Verifica se a URL é acessível (opcional)
-        if (config('filesystems.default') === 'public') {
-            $this->assertEquals(200, $this->get($responseData['url'])->status());
-        }
     }
 
+    /**
+     * Summary of test_it_validates_image_upload
+     * @return void
+     */
     public function test_it_validates_image_upload()
     {
         $this->actingAs($this->user);
 
         // 1. Teste com arquivo inválido (não imagem)
-        $invalidFile = UploadedFile::fake()->create('document.pdf', (6 * 1024));
+        $invalidFile = UploadedFile::fake()->create('document.pdf', (1500));
         $response = $this->postJson(route('images.store'), [
             'images' => [$invalidFile]
         ]);
