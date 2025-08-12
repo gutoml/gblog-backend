@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Posts\PostUpdateRequest;
-use App\Http\Resources\PostResource;
+use Exception;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Services\Posts\PostStoreService;
+use App\Services\Posts\PostUpdateService;
 use App\Http\Requests\Posts\PostStoreRequest;
+use App\Http\Requests\Posts\PostUpdateRequest;
 
 class PostController extends Controller
 {
@@ -18,9 +20,14 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->post->all();
+        return $this->post
+            ->with(['user', 'category'])
+            ->latest()
+            ->paginate(
+                $request->has('per_page') ? $request->per_page : 20
+            );
     }
 
     /**
@@ -28,13 +35,15 @@ class PostController extends Controller
      */
     public function store(PostStoreRequest $request): JsonResponse
     {
-        $post = $this->post->create($request->validated());
-        $post->images()->attach($request->image_id);
+        try {
+            $postStoreService = new PostStoreService();
+            $response = $postStoreService->execute($request->validated());
+        } catch (Exception $e) {
+            throw new Exception("There was an error trying to create the post");
+        }
 
         return response()->json(
-            new PostResource(
-                $post->load(['category', 'images'])
-            ),
+            $response,
             201
         );
     }
@@ -45,9 +54,7 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         return response()->json(
-            new PostResource(
-                $post->load(['category', 'images'])
-            )
+            $post->load(['user', 'category', 'images', 'relatedPosts']),
         );
     }
 
@@ -56,10 +63,14 @@ class PostController extends Controller
      */
     public function update(PostUpdateRequest $request, Post $post): JsonResponse
     {
-        $post->update($request->validated());
-        $post->images()->sync($request->image_id);
+        try {
+            $postUpdateService = new PostUpdateService($post);
+            $response = $postUpdateService->execute($request->validated());
+        } catch (Exception $e) {
+            throw new Exception("There was an error trying to create the post");
+        }
 
-        return response()->json(new PostResource($post->load(['category', 'images'])));
+        return response()->json($response);
     }
 
     /**

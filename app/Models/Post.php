@@ -42,4 +42,22 @@ class Post extends Model
     {
         return $this->morphToMany(Image::class, 'imageable');
     }
+
+    public function relatedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_relationships', 'post_id', 'related_post_id')
+            ->withTimestamps();
+    }
+
+    public function relatedFromPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_relationships', 'related_post_id', 'post_id')
+            ->withTimestamps();
+    }
+
+    // Método para todos os posts relacionados (bidirecional)
+    public function allRelatedPosts()
+    {
+        return $this->relatedPosts->merge($this->relatedFromPosts);
+    }
 }

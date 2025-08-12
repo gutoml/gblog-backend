@@ -53,12 +53,29 @@ class PostStoreRequest extends FormRequest
                 'max:255',
                 Rule::unique('posts', 'slug'),
             ],
+            'related_posts' => [
+                'nullable',
+                'array',
+                '*' => [
+                    'required',
+                    'string',
+                    Rule::exists('posts', 'id')
+                ]
+            ]
         ];
     }
 
     /**
      * Summary of messages
-     * @return array{content.min: string, content.required: string, slug.required: string, slug.unique: string, title.max: string, title.required: string}
+     * @return array{
+     * content.min: string,
+     * content.required: string,
+     * slug.required: string,
+     * slug.unique: string,
+     * title.max: string,
+     * title.required: string,
+     * related_posts: string,
+     * }
      */
     public function messages(): array
     {
@@ -75,12 +92,16 @@ class PostStoreRequest extends FormRequest
             'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
             'slug.required' => 'O :attribute é obrigatório.',
             'slug.unique' => 'Este :attribute já está em uso.',
+            'related_posts.array' => 'O campo de :attribute deve ser uma lista.',
+            'related_posts.*.required' => 'O campo de :attribute não pode ser vazio.',
+            'related_posts.*.string' => 'O campo de :attribute não é válido.',
+            'related_posts.*.exists' => 'O campo de :attribute não é válido.',
         ];
     }
 
     /**
      * Summary of attributes
-     * @return array{category_id: \App\Models\Category, image_id: \App\Models\Image, content: string, slug: string, title: string}
+     * @return array{category_id: \App\Models\Category, image_id: \App\Models\Image, content: string, slug: string, title: string, related_posts: string}
      */
     public function attributes(): array
     {
@@ -90,6 +111,7 @@ class PostStoreRequest extends FormRequest
             'title' => 'título',
             'content' => 'conteúdo',
             'slug' => 'slug',
+            'related_posts' => 'postagens relacionadas'
         ];
     }
 

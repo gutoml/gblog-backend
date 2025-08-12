@@ -18,6 +18,10 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
+    Route::post('/related-post', function(Request $request) {
+        dd($request->all());
+    });
+
     // Rotas privadas
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');

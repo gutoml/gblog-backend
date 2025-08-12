@@ -53,6 +53,15 @@ class PostUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique('posts', 'slug')->ignore($this->post?->id),
             ],
+            'related_posts' => [
+                'nullable',
+                'array',
+                '*' => [
+                    'required',
+                    'string',
+                    Rule::exists('posts', 'id')
+                ]
+            ]
         ];
     }
 
@@ -70,6 +79,10 @@ class PostUpdateRequest extends FormRequest
             'title.max' => 'O :attribute não pode ter mais de 255 caracteres.',
             'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
             'slug.unique' => 'Este :attribute já está em uso.',
+            'related_posts.array' => 'O campo de :attribute deve ser uma lista.',
+            'related_posts.*.required' => 'O campo de :attribute não pode ser vazio.',
+            'related_posts.*.string' => 'O campo de :attribute não é válido.',
+            'related_posts.*.exists' => 'O campo de :attribute não é válido.',
         ];
     }
 
@@ -85,6 +98,7 @@ class PostUpdateRequest extends FormRequest
             'title' => 'título',
             'content' => 'conteúdo',
             'slug' => 'slug',
+            'related_posts' => 'postagens relacionadas'
         ];
     }
 

@@ -66,14 +66,7 @@ class PostTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonFragment([
                 'user_id' => $this->user->id,
-                'category' => [
-                    'name' => $this->category1->name,
-                    'slug' => $this->category1->slug,
-                ],
-                'image' => [
-                    'name' => $this->image1->name,
-                    'url' => $this->image1->url,
-                ],
+                'category_id' => $this->category1->id,
                 'title' => 'Valid Post Title',
                 'content' => 'This is the content of the post.',
                 'slug' => 'valid-post-title',
