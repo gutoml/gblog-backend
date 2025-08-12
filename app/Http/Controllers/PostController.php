@@ -39,7 +39,7 @@ class PostController extends Controller
             $postStoreService = new PostStoreService();
             $response = $postStoreService->execute($request->validated());
         } catch (Exception $e) {
-            throw new Exception("There was an error trying to create the post");
+            throw new Exception($e->getMessage());
         }
 
         return response()->json(
@@ -67,7 +67,7 @@ class PostController extends Controller
             $postUpdateService = new PostUpdateService($post);
             $response = $postUpdateService->execute($request->validated());
         } catch (Exception $e) {
-            throw new Exception("There was an error trying to create the post");
+            throw new Exception($e->getMessage());
         }
 
         return response()->json($response);
