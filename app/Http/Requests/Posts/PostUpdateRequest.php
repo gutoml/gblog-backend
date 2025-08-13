@@ -42,6 +42,11 @@ class PostUpdateRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'description' => [
+                'sometimes',
+                'string',
+                'max:255',
+            ],
             'content' => [
                 'sometimes',
                 'string',
@@ -67,7 +72,14 @@ class PostUpdateRequest extends FormRequest
 
     /**
      * Summary of messages
-     * @return array{content.min: string, content.required: string, slug.required: string, slug.unique: string, title.max: string, title.required: string}
+     * @return array{content.min: string,
+     * content.required: string,
+     * description.max: string,
+     * slug.required: string,
+     * slug.unique: string,
+     * title.max: string,
+     * title.required: string
+     * }
      */
     public function messages(): array
     {
@@ -77,6 +89,7 @@ class PostUpdateRequest extends FormRequest
             'category_id.exists' => 'A :attribute selecionada não existe.',
             'image_id.exists' => 'Essa :attribute não existe.',
             'title.max' => 'O :attribute não pode ter mais de 255 caracteres.',
+            'description.max' => 'A :attribute não pode ter mais de 255 caracteres.',
             'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
             'slug.unique' => 'Este :attribute já está em uso.',
             'related_posts.array' => 'O campo de :attribute deve ser uma lista.',
@@ -88,7 +101,13 @@ class PostUpdateRequest extends FormRequest
 
     /**
      * Summary of attributes
-     * @return array{category_id: \App\Models\Category, image_id: \App\Models\Image, content: string, slug: string, title: string}
+     * @return array{
+     * category_id: \App\Models\Category,
+     * description: string,
+     * image_id: \App\Models\Image,
+     * content: string, slug:
+     * string, title: string
+     * }
      */
     public function attributes(): array
     {
@@ -96,6 +115,7 @@ class PostUpdateRequest extends FormRequest
             'category_id' => 'categoria',
             'image_id' => 'imagem',
             'title' => 'título',
+            'description' => 'descrição',
             'content' => 'conteúdo',
             'slug' => 'slug',
             'related_posts' => 'postagens relacionadas'

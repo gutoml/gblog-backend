@@ -45,10 +45,11 @@ class PostTest extends TestCase
             'category_id' => null,
             'image_id' => null,
             'title' => '',
+            'description' => '',
             'content' => '',
             'slug' => '',
         ])->assertStatus(422)
-        ->assertJsonValidationErrors(['category_id', 'image_id', 'title', 'content', 'slug']);
+        ->assertJsonValidationErrors(['category_id', 'image_id', 'title', 'description', 'content', 'slug']);
     }
 
     public function test_valid_data()
@@ -61,6 +62,7 @@ class PostTest extends TestCase
             'category_id' => $this->category1->id,
             'image_id' => $this->image1->id,
             'title' => 'Valid Post Title',
+            'description' => 'Valid Post Description',
             'content' => 'This is the content of the post.',
             'slug' => 'valid-post-title',
             'related_posts' => [
@@ -73,6 +75,7 @@ class PostTest extends TestCase
                 'user_id' => $this->user->id,
                 'category_id' => $this->category1->id,
                 'title' => 'Valid Post Title',
+                'description' => 'Valid Post Description',
                 'content' => 'This is the content of the post.',
                 'slug' => 'valid-post-title',
             ])
@@ -80,6 +83,7 @@ class PostTest extends TestCase
             ->assertJsonPath('related_posts.0.user_id', $relatedPost->user_id)
             ->assertJsonPath('related_posts.0.category_id', $relatedPost->category_id)
             ->assertJsonPath('related_posts.0.title', $relatedPost->title)
+            ->assertJsonPath('related_posts.0.description', $relatedPost->description)
             ->assertJsonPath('related_posts.0.content', $relatedPost->content)
             ->assertJsonPath('related_posts.0.slug', $relatedPost->slug);
 
@@ -87,6 +91,7 @@ class PostTest extends TestCase
             'user_id' => $this->user->id,
             'category_id' => $this->category1->id,
             'title' => 'Valid Post Title',
+            'description' => 'Valid Post Description',
             'content' => 'This is the content of the post.',
             'slug' => 'valid-post-title',
         ]);
@@ -111,6 +116,7 @@ class PostTest extends TestCase
             'category_id' => $this->category2->id,
             'image_id' => $this->image2->id,
             'title' => 'Updated Title',
+            'description' => 'Updated Description',
             'content' => 'Updated content of the post.',
             'slug' => 'updated-title',
         ]);
@@ -121,6 +127,7 @@ class PostTest extends TestCase
                 'category_id' => $this->category2->id,
                 'image_id' => $this->image2->id,
                 'title' => 'Updated Title',
+                'description' => 'Updated Description',
                 'content' => 'Updated content of the post.',
                 'slug' => 'updated-title',
             ]);
@@ -129,6 +136,7 @@ class PostTest extends TestCase
             'id' => $post->id,
             'category_id' => $this->category2->id,
             'title' => 'Updated Title',
+            'description' => 'Updated Description',
             'content' => 'Updated content of the post.',
             'slug' => 'updated-title',
         ]);
@@ -159,6 +167,7 @@ class PostTest extends TestCase
             'category_id' => null,
             'image_id' => null,
             'title' => '',
+            'description' => '',
             'content' => '',
             'slug' => '',
         ]);

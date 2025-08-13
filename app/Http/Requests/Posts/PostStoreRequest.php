@@ -42,6 +42,11 @@ class PostStoreRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'description' => [
+                'required',
+                'string',
+                'max:255',
+            ],
             'content' => [
                 'required',
                 'string',
@@ -70,6 +75,8 @@ class PostStoreRequest extends FormRequest
      * @return array{
      * content.min: string,
      * content.required: string,
+     * description.max: string,
+     * description.required: string,
      * slug.required: string,
      * slug.unique: string,
      * title.max: string,
@@ -88,6 +95,8 @@ class PostStoreRequest extends FormRequest
             'image_id.exists' => 'Essa :attribute não existe.',
             'title.required' => 'O :attribute é obrigatório.',
             'title.max' => 'O :attribute não pode ter mais de 255 caracteres.',
+            'description.required' => 'A :attribute é obrigatório.',
+            'description.max' => 'A :attribute não pode ter mais de 255 caracteres.',
             'content.required' => 'O :attribute é obrigatório.',
             'content.min' => 'O :attribute deve ter pelo menos 10 caracteres.',
             'slug.required' => 'O :attribute é obrigatório.',
@@ -109,6 +118,7 @@ class PostStoreRequest extends FormRequest
             'category_id' => 'categoria',
             'image_id' => 'imagem',
             'title' => 'título',
+            'description' => 'descrição',
             'content' => 'conteúdo',
             'slug' => 'slug',
             'related_posts' => 'postagens relacionadas'

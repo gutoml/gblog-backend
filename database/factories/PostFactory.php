@@ -21,7 +21,8 @@ class PostFactory extends Factory
         return [
             'user_id' => \App\Models\User::factory(),
             'category_id' => \App\Models\Category::factory(),
-            'title' => fake()->sentence,
+            'title' => $title,
+            'description' => fake()->words(20, true),
             'content' => fake()->paragraph,
             'slug' => str($title)->slug()->toString(),
         ];
