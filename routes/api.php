@@ -23,13 +23,15 @@ Route::prefix('v1')->group(function () {
     Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
     Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show')->middleware('track.view');
 
+    Route::get('/post-highline', [PostHighlineController::class, 'index'])->name('post-highline.index');
+
     // Rotas privadas
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::apiResource('categories', CategoryController::class);
         Route::apiResource('posts', PostController::class)->except(['index', 'show']);
         Route::apiResource('images', ImageController::class)->except(['update']);
-        Route::apiResource('post-highline', PostHighlineController::class)->except('update');
+        Route::apiResource('post-highline', PostHighlineController::class)->except(['index', 'update']);
         Route::put('/post-highline', [PostHighlineController::class, 'update'])->name('post-highline.update');
     });
 });

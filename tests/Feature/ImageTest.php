@@ -197,18 +197,15 @@ class ImageTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Garante que o banco está vazio
         Image::query()->delete();
 
-        // 1. Teste para show()
-        $response = $this->getJson(route('images.show', 1)); // Primeiro ID que não existe
+        $response = $this->getJson(route('images.show', 1));
 
         $response->assertStatus(404)
             ->assertJsonStructure([
                 'message'
             ]);
 
-        // 2. Teste para destroy()
         $response = $this->deleteJson(route('images.destroy', 1));
 
         $response->assertStatus(404)
@@ -216,14 +213,12 @@ class ImageTest extends TestCase
                 'message'
             ]);
 
-        // 3. Teste com ID inválido (string)
         $response = $this->getJson(route('images.show', 'invalid-id'));
         $response->assertStatus(404);
     }
 
     public function test_it_forbids_upload_to_unauthenticated_users()
     {
-        // 1. Teste sem nenhuma autenticação
         $image = UploadedFile::fake()->image('test.jpg');
 
         $response = $this->postJson(route('images.store'), [
@@ -232,10 +227,9 @@ class ImageTest extends TestCase
 
         $response->assertStatus(401)
             ->assertJson([
-                'message' => 'Unauthenticated.' // Mensagem padrão do Laravel
+                'message' => 'Unauthenticated.'
             ]);
 
-        // 2. Teste com token inválido (opcional)
         $response = $this->withHeaders([
             'Authorization' => 'Bearer invalid-token'
         ])->postJson(route('images.store'), [
@@ -256,16 +250,14 @@ class ImageTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Cria uma imagem fake que atende todas as validações
         $image = UploadedFile::fake()->image('profile.jpg', 800, 600)
-            ->size(1500) // 1.5KB
+            ->size(1500)
             ->mimeType('image/jpeg');
 
         $response = $this->postJson(route('images.store'), [
             'images' => [$image]
         ]);
 
-        // Verifica a resposta
         $response->assertStatus(201)
             ->assertJsonStructure([[
                 'id',
@@ -273,13 +265,11 @@ class ImageTest extends TestCase
                 'url'
             ]]);
 
-        // Verifica se a imagem foi armazenada
         $imageData = $response->json()[0];
         Storage::disk('public')->assertExists(
             str_replace('/storage/', '', $imageData['url'])
         );
 
-        // Verifica se foi criado no banco de dados
         $this->assertDatabaseHas('images', [
             'id' => $imageData['id'],
             'name' => $imageData['name'],
@@ -295,7 +285,6 @@ class ImageTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Cria 3 imagens fakes válidas
         $images = [
             UploadedFile::fake()->image('image1.jpg', 800, 600)->size(1500),
             UploadedFile::fake()->image('image2.png', 800, 600)->size(1500),
@@ -306,14 +295,12 @@ class ImageTest extends TestCase
             'images' => $images
         ]);
 
-        // Verifica a resposta
         $response->assertStatus(201)
             ->assertJsonCount(3)
             ->assertJsonStructure([
                 '*' => ['id', 'name', 'url']
             ]);
 
-        // Verifica cada imagem individualmente
         foreach ($response->json() as $imageData) {
             Storage::disk('public')->assertExists(
                 str_replace('/storage/', '', $imageData['url'])
@@ -335,15 +322,13 @@ class ImageTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // Cria imagem de teste válida
         $image = UploadedFile::fake()->image('profile.jpg', 800, 600)
-            ->size(2000); // 2mb
+            ->size(2000);
 
         $response = $this->postJson(route('images.store'), [
             'images' => [$image]
         ]);
 
-        // Verifica status e estrutura básica
         $response->assertStatus(201)
             ->assertJsonStructure([
                 '*' => [
@@ -353,7 +338,6 @@ class ImageTest extends TestCase
                 ]
             ]);
 
-        // Verifica dados específicos na resposta
         $responseData = $response->json()[0];
         $this->assertEquals('profile.jpg', $responseData['name']);
         $this->assertNotNull($responseData['id']);
@@ -367,7 +351,6 @@ class ImageTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        // 1. Teste com arquivo inválido (não imagem)
         $invalidFile = UploadedFile::fake()->create('document.pdf', (1500));
         $response = $this->postJson(route('images.store'), [
             'images' => [$invalidFile]
@@ -376,8 +359,7 @@ class ImageTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['images.0']);
 
-        // 3. Teste com arquivo muito grande (>5MB)
-        $largeFile = UploadedFile::fake()->image('large.jpg')->size(6 * 1024); // 6MB
+        $largeFile = UploadedFile::fake()->image('large.jpg')->size(6 * 1024);
         $response = $this->postJson(route('images.store'), [
             'images' => [$largeFile]
         ]);
@@ -385,7 +367,6 @@ class ImageTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['images.0']);
 
-        // 4. Teste sem arquivos
         $response = $this->postJson(route('images.store'), [
             'images' => []
         ]);

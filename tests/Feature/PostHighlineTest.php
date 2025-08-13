@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Collection;
 use Tests\TestCase;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\PostHighline;
+use Illuminate\Support\Collection;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -23,6 +24,36 @@ class PostHighlineTest extends TestCase
 
         $this->posts = Post::factory()->count(7)->create();
         $this->user = User::factory()->create();
+    }
+
+    public function test_list_posts_highline(): void
+    {
+        $limit = 4;
+
+        PostHighline::truncate();
+
+        $postsHighline = PostHighline::factory()
+            ->count($limit)
+            ->sequence(fn ($sequence) => ['order' => $sequence->index + 1])
+            ->create();
+
+        $response = $this->getJson(route('post-highline.index'));
+
+        $response->assertOk();
+        $response->assertJsonCount($limit);
+
+        // Ordena pelo campo 'order' para comparar corretamente
+        $postsHighline = $postsHighline->sortBy('order')->values();
+
+        $postsHighline->each(function ($post, $index) use ($response) {
+            $response->assertJsonPath("{$index}.post_id", $post->post_id);
+            $response->assertJsonPath("{$index}.order", $post->order);
+
+            $this->assertDatabaseHas('post_highlines', [
+                'post_id' => $post->post_id,
+                'order' => $post->order,
+            ]);
+        });
     }
 
     /**
@@ -92,5 +123,20 @@ class PostHighlineTest extends TestCase
         $response->assertStatus(422);
 
         $response->assertJsonValidationErrors(['posts.0', 'posts.1']);
+    }
+
+    public function test_delete_post_highline()
+    {
+        $this->actingAs($this->user);
+
+        $postHighline = PostHighline::factory()->create();
+
+        $response = $this->deleteJson(route('post-highline.destroy', $postHighline->id));
+
+        $response->assertNoContent();
+        $this->assertDatabaseMissing('post_highlines', [
+            'post_id' => $postHighline->id,
+            'order' => $postHighline->order,
+        ]);
     }
 }
