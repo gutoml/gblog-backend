@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostHighlineController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 
@@ -16,17 +18,18 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::get('/home', HomeController::class)->name('home');
 
-    Route::post('/related-post', function(Request $request) {
-        dd($request->all());
-    });
+    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show')->middleware('track.view');
 
     // Rotas privadas
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::apiResource('categories', CategoryController::class);
-        Route::apiResource('posts', PostController::class)->except(['show']);
+        Route::apiResource('posts', PostController::class)->except(['index', 'show']);
         Route::apiResource('images', ImageController::class)->except(['update']);
+        Route::apiResource('post-highline', PostHighlineController::class)->except('update');
+        Route::put('/post-highline', [PostHighlineController::class, 'update'])->name('post-highline.update');
     });
 });

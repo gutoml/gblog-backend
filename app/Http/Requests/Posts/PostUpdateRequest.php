@@ -54,7 +54,7 @@ class PostUpdateRequest extends FormRequest
                 Rule::unique('posts', 'slug')->ignore($this->post?->id),
             ],
             'related_posts' => [
-                'nullable',
+                'sometimes',
                 'array',
                 '*' => [
                     'required',

@@ -10,6 +10,7 @@ use App\Services\Posts\PostStoreService;
 use App\Services\Posts\PostUpdateService;
 use App\Http\Requests\Posts\PostStoreRequest;
 use App\Http\Requests\Posts\PostUpdateRequest;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PostController extends Controller
 {
@@ -20,7 +21,7 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): LengthAwarePaginator
     {
         return $this->post
             ->with(['user', 'category'])
@@ -37,13 +38,13 @@ class PostController extends Controller
     {
         try {
             $postStoreService = new PostStoreService();
-            $response = $postStoreService->execute($request->validated());
+            $responseData = $postStoreService->execute($request->validated());
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            throw new Exception("Falha ao tentar criar a postagem: {$e->getMessage()}");
         }
 
         return response()->json(
-            $response,
+            $responseData,
             201
         );
     }
@@ -65,18 +66,18 @@ class PostController extends Controller
     {
         try {
             $postUpdateService = new PostUpdateService($post);
-            $response = $postUpdateService->execute($request->validated());
+            $responseData = $postUpdateService->execute($request->validated());
         } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+            throw new Exception("Falha ao tentar atualizar a postagem: {$e->getMessage()}");
         }
 
-        return response()->json($response);
+        return response()->json($responseData);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post): JsonResponse
     {
         $post->delete();
 

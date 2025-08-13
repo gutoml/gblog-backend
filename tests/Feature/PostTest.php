@@ -55,12 +55,17 @@ class PostTest extends TestCase
     {
         $this->actingAs($this->user);
 
+        $relatedPost = Post::factory()->create();
+
         $response = $this->postJson(route('posts.store'), [
             'category_id' => $this->category1->id,
             'image_id' => $this->image1->id,
             'title' => 'Valid Post Title',
             'content' => 'This is the content of the post.',
             'slug' => 'valid-post-title',
+            'related_posts' => [
+                $relatedPost->id
+            ]
         ]);
 
         $response->assertStatus(201)
@@ -70,7 +75,13 @@ class PostTest extends TestCase
                 'title' => 'Valid Post Title',
                 'content' => 'This is the content of the post.',
                 'slug' => 'valid-post-title',
-            ]);
+            ])
+            ->assertJsonPath('related_posts.0.id', $relatedPost->id)
+            ->assertJsonPath('related_posts.0.user_id', $relatedPost->user_id)
+            ->assertJsonPath('related_posts.0.category_id', $relatedPost->category_id)
+            ->assertJsonPath('related_posts.0.title', $relatedPost->title)
+            ->assertJsonPath('related_posts.0.content', $relatedPost->content)
+            ->assertJsonPath('related_posts.0.slug', $relatedPost->slug);
 
         $this->assertDatabaseHas('posts', [
             'user_id' => $this->user->id,
@@ -107,14 +118,8 @@ class PostTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonFragment([
                 'user_id' => $this->user->id,
-                'category' => [
-                    'name' => $this->category2->name,
-                    'slug' => $this->category2->slug,
-                ],
-                'image' => [
-                    'name' => $this->image2->name,
-                    'url' => $this->image2->url,
-                ],
+                'category_id' => $this->category2->id,
+                'image_id' => $this->image2->id,
                 'title' => 'Updated Title',
                 'content' => 'Updated content of the post.',
                 'slug' => 'updated-title',

@@ -23,7 +23,7 @@ class PostFactory extends Factory
             'category_id' => \App\Models\Category::factory(),
             'title' => fake()->sentence,
             'content' => fake()->paragraph,
-            'slug' => str($title)->slug(),
+            'slug' => str($title)->slug()->toString(),
         ];
     }
 }

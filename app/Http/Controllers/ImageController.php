@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\ImageRequest;
 use App\Services\ImageStoreService;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ImageController extends Controller
 {
@@ -18,30 +20,30 @@ class ImageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): LengthAwarePaginator
     {
-        return $this->image->orderBy('created_at', 'desc')->paginate($request->has('per_page') ? $request->per_page : 20);
+        return $this->image
+            ->latest()
+            ->paginate($request->has('per_page') ? $request->per_page : 20);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ImageRequest $request)
+    public function store(ImageRequest $request, ImageStoreService $imageStoreService): JsonResponse
     {
         $responseData = [];
 
-        foreach ($request->images as $image) {
-            $imageStoreService = new ImageStoreService();
-            $responseUpload = $imageStoreService->execute($image);
-            if (! $image = $this->image->create($responseUpload)) {
-                return response()->json(['error' => 'It was not possible to register the images in the database']);
+        try {
+            foreach ($request->images as $image) {
+                $responseUpload = $imageStoreService->execute($image);
+                $responseData[] = $responseUpload;
             }
-
-            $responseData[] = [
-                'id' => $image->id,
-                'name' => $image->name,
-                'url' => $image->url,
-            ];
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Image upload failed',
+                'message' => $e->getMessage()
+            ], 500);
         }
 
         return response()->json($responseData, 201);

@@ -2,16 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Services\Service;
-use Illuminate\Database\Eloquent\Model;
-use Mockery;
-use Mockery\MockInterface;
+use Exception;
 use Str;
+use Mockery;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Image;
+use App\Services\Service;
+use Mockery\MockInterface;
 use Illuminate\Http\UploadedFile;
 use App\Services\ImageStoreService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -169,28 +171,12 @@ class ImageTest extends TestCase
 
         $validImage = UploadedFile::fake()->image('valid.jpg', 800, 600)->size(1500);
 
-        // Mock do service
-        $this->instance(
-            Service::class,
+        $this->app->instance(
+            ImageStoreService::class,
             $this->mock(ImageStoreService::class, function(MockInterface $mock) use ($validImage) {
                 $mock->shouldReceive('execute')
                     ->with($validImage)
-                    ->andReturnValues([
-                        'name' => $validImage->getClientOriginalName(),
-                        'url' => 'images/' . $validImage->getClientOriginalName()
-                    ]);
-            })
-        );
-
-        $this->instance(
-            Model::class,
-            $this->mock(Image::class, function(MockInterface $mock) use($validImage) {
-                $mock->shouldReceive('create')
-                    ->with([
-                        'name' => $validImage->getClientOriginalName(),
-                        'url' => 'images/' . $validImage->getClientOriginalName(),
-                    ])
-                    ->andReturn(false);
+                    ->andThrow(new Exception("Failed to create image registry", 500));
             })
         );
 
@@ -200,7 +186,6 @@ class ImageTest extends TestCase
 
         $response->assertStatus(500);
 
-        // Storage::disk('public')->assertMissing('images/valid.jpg');
         Storage::disk('public')->assertMissing('images/valid.jpg');
     }
 

@@ -17,7 +17,7 @@ class PostUpdateService implements Service
         $response = DB::transaction(function() use ($data) {
             $this->post->update($data);
             $this->post->images()->sync($data['image_id']);
-            $this->post->relatedPosts()->sync($data['related_posts']);
+            $this->post->relatedPosts()->sync($data['related_posts'] ?? []);
             $this->post->load(['user', 'category', 'images', 'relatedPosts']);
 
             return $this->post->toArray();
